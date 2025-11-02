@@ -16,6 +16,8 @@ import AdminProviders from '@/components/admin/providers/AdminProviders'
 import AdminHeader from '@/components/admin/layout/AdminHeader'
 import AdminSidebar from '@/components/admin/layout/AdminSidebar'
 import AdminFooter from '@/components/admin/layout/AdminFooter'
+import { MenuCustomizationModal } from '@/components/admin/layout/MenuCustomizationModal'
+import { useMenuCustomizationFeature } from '@/hooks/useMenuCustomizationFeature'
 import { useSidebarCollapsed, useSidebarActions } from '@/stores/admin/layout.store.selectors'
 
 interface ClientOnlyAdminLayoutProps {
@@ -26,8 +28,10 @@ interface ClientOnlyAdminLayoutProps {
 export default function ClientOnlyAdminLayout({ children, session }: ClientOnlyAdminLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isClient, setIsClient] = useState(false)
+  const [isMenuModalOpen, setIsMenuModalOpen] = useState(false)
   const sidebarCollapsed = useSidebarCollapsed()
   const { setCollapsed } = useSidebarActions()
+  const { isEnabled, isEnabledForCurrentUser } = useMenuCustomizationFeature()
 
   // Ensure client-side rendering to avoid hydration mismatches
   useEffect(() => {
@@ -64,16 +68,16 @@ export default function ClientOnlyAdminLayout({ children, session }: ClientOnlyA
   }
 
   if (!isClient) {
-    return <div className="min-h-screen bg-gray-50" />
+    return <div className="min-h-screen bg-background" />
   }
 
   return (
     <SessionProvider session={session}>
       <AdminProviders>
-        <div className="min-h-screen bg-gray-50 relative">
+        <div className="min-h-screen bg-background relative">
           <a
             href="#admin-main-content"
-            className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:bg-white focus:text-blue-600 focus:ring-2 focus:ring-blue-600 focus:px-3 focus:py-2 focus:z-[60] rounded"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:bg-card focus:text-blue-600 focus:ring-2 focus:ring-blue-600 focus:px-3 focus:py-2 focus:z-[60] rounded"
           >
             Skip to main content
           </a>
@@ -82,6 +86,7 @@ export default function ClientOnlyAdminLayout({ children, session }: ClientOnlyA
           <AdminSidebar
             isCollapsed={sidebarCollapsed}
             isMobile={false}
+            onOpenMenuCustomization={isEnabled && isEnabledForCurrentUser ? () => setIsMenuModalOpen(true) : undefined}
           />
 
           {/* Mobile Sidebar Overlay */}
@@ -91,6 +96,7 @@ export default function ClientOnlyAdminLayout({ children, session }: ClientOnlyA
                 isMobile={true}
                 isOpen={isMobileMenuOpen}
                 onClose={handleMobileMenuClose}
+                onOpenMenuCustomization={isEnabled && isEnabledForCurrentUser ? () => setIsMenuModalOpen(true) : undefined}
               />
             </div>
           )}
@@ -139,6 +145,12 @@ export default function ClientOnlyAdminLayout({ children, session }: ClientOnlyA
             <AdminFooter sidebarCollapsed={sidebarCollapsed} />
           </div>
         </div>
+        {isEnabled && isEnabledForCurrentUser && (
+          <MenuCustomizationModal
+            isOpen={isMenuModalOpen}
+            onClose={() => setIsMenuModalOpen(false)}
+          />
+        )}
       </AdminProviders>
     </SessionProvider>
   )

@@ -15,7 +15,7 @@ export default function SidebarHeader({ collapsed }: SidebarHeaderProps) {
   const { toggleSidebar, setCollapsed, setMobileOpen } = useSidebarActions()
 
   return (
-    <div className="header-container h-16 border-b border-gray-200 flex items-center justify-between transition-all duration-300 px-4">
+    <div className="header-container h-16 border-b border-border flex items-center justify-between transition-all duration-300 px-4">
       {!collapsedState ? (
         <div className="expanded-header flex items-center justify-between w-full gap-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -23,37 +23,37 @@ export default function SidebarHeader({ collapsed }: SidebarHeaderProps) {
               <Building className="h-8 w-8 text-blue-600" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-lg font-semibold text-gray-900 truncate">NextAccounting</h1>
-              <p className="text-xs text-gray-500">Admin Portal</p>
+              <h1 className="text-lg font-semibold text-foreground truncate">NextAccounting</h1>
+              <p className="text-xs text-muted-foreground">Admin Portal</p>
             </div>
           </div>
           <button
             onClick={() => setCollapsed(true)}
-            className="collapse-btn p-2 rounded-md hover:bg-gray-100 active:bg-gray-200 transition-colors flex-shrink-0"
+            className="collapse-btn p-2 rounded-md hover:bg-muted active:bg-muted/80 transition-colors flex-shrink-0"
             aria-label="Collapse sidebar"
             title="Collapse sidebar (Ctrl+B)"
           >
-            <Menu className="w-5 h-5 text-gray-600" />
+            <Menu className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>
       ) : (
         <button
           onClick={() => setCollapsed(false)}
-          className="expand-btn w-full flex items-center justify-center p-2 hover:bg-gray-100 active:bg-gray-200 rounded-md transition-colors"
+          className="expand-btn w-full flex items-center justify-center p-2 hover:bg-muted active:bg-muted/80 rounded-md transition-colors"
           aria-label="Expand sidebar"
           title="Expand sidebar (Ctrl+B)"
         >
-          <Menu className="w-5 h-5 text-gray-600" />
+          <Menu className="w-5 h-5 text-muted-foreground" />
         </button>
       )}
 
       {isMobile && (
         <button
           onClick={() => setMobileOpen(false)}
-          className="p-2 rounded hover:bg-gray-100 transition-colors"
+          className="p-2 rounded hover:bg-muted transition-colors"
           aria-label="Close navigation"
         >
-          <X className="w-4 h-4 text-gray-600" />
+          <X className="w-4 h-4 text-muted-foreground" />
         </button>
       )}
     </div>

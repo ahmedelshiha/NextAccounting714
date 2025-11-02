@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import UserProfileDropdown from '../admin/layout/Header/UserProfileDropdown'
+import UserProfileDropdown from '../admin/layout/Header/UserProfileDropdownWrapper'
 
 export interface UserProfileDropdownBuilderProps {
   showStatus?: boolean

@@ -1,63 +1,87 @@
 /**
  * Profile Management Constants
- * Common timezone list and validation utilities
+ * Common values and validation utilities
+ * Note: Core validation moved to src/schemas/user-profile.ts
+ * Languages now loaded from language registry (data-driven)
  */
 
-export const COMMON_TIMEZONES = [
-  'UTC',
-  'US/Eastern',
-  'US/Central',
-  'US/Mountain',
-  'US/Pacific',
-  'Europe/London',
-  'Europe/Paris',
-  'Europe/Berlin',
-  'Asia/Dubai',
-  'Asia/Kolkata',
-  'Asia/Bangkok',
-  'Asia/Singapore',
-  'Asia/Tokyo',
-  'Australia/Sydney',
-]
+import { getCommonTimezones, isValidTimezone, getAvailableTimezones } from '@/schemas/user-profile'
+
+// Re-export from central schema location
+export { isValidTimezone, getAvailableTimezones }
+
+export const COMMON_TIMEZONES = getCommonTimezones()
 
 /**
- * Validate timezone using Intl API (IANA timezone database)
- * More robust than hardcoded list
+ * Fallback languages (used when language registry unavailable)
+ * These match the defaults in src/lib/language-registry.ts
  */
-export function isValidTimezone(tz: string): boolean {
-  try {
-    // If Intl API doesn't throw, timezone is valid
-    Intl.DateTimeFormat(undefined, { timeZone: tz })
-    return true
-  } catch (e) {
-    return false
-  }
-}
-
-/**
- * Get all available timezones (if supported by environment)
- * Falls back to common timezones if not available
- */
-export function getAvailableTimezones(): string[] {
-  // Check if Intl.supportedValuesOf is available (Node.js 18+, modern browsers)
-  if (typeof Intl.supportedValuesOf === 'function') {
-    try {
-      return (Intl.supportedValuesOf as any)('timeZone') as string[]
-    } catch {
-      // Fallback if not supported
-      return COMMON_TIMEZONES
-    }
-  }
-  return COMMON_TIMEZONES
-}
-
-export const LANGUAGES = [
+export const FALLBACK_LANGUAGES = [
   { code: 'en', label: 'English' },
   { code: 'ar', label: 'العربية' },
   { code: 'hi', label: 'हिन्दी' },
 ]
 
+/**
+ * DEPRECATED: Use getLanguagesForUI() instead
+ * Kept for backward compatibility
+ */
+export const LANGUAGES = FALLBACK_LANGUAGES
+
+/**
+ * DEPRECATED: Use getEnabledLanguageCodes() from language-registry.ts instead
+ * Kept for backward compatibility
+ */
 export const VALID_LANGUAGES = ['en', 'ar', 'hi']
+
+/**
+ * Get languages for UI dropdown
+ * This function should be called server-side and passed to client
+ * Loads from language registry if available, falls back to hardcoded list
+ */
+export async function getLanguagesForUI() {
+  try {
+    const { getEnabledLanguages } = await import('@/lib/language-registry')
+    const enabled = await getEnabledLanguages()
+    return enabled.map((lang) => ({
+      code: lang.code,
+      label: lang.nativeName,
+    }))
+  } catch (error) {
+    console.warn('Failed to load languages from registry, using fallback', error)
+    return FALLBACK_LANGUAGES
+  }
+}
+
+/**
+ * Profile fields configuration for EditableField component
+ */
+export const PROFILE_FIELDS = [
+  {
+    key: 'name',
+    label: 'Full Name',
+    placeholder: 'Enter your full name',
+    verified: false,
+    masked: false,
+    fieldType: 'text' as const,
+  },
+  {
+    key: 'email',
+    label: 'Email',
+    placeholder: 'Enter your email address',
+    verified: false,
+    masked: false,
+    fieldType: 'email' as const,
+  },
+  {
+    key: 'organization',
+    label: 'Organization',
+    placeholder: 'Enter your organization name',
+    verified: false,
+    masked: false,
+    fieldType: 'text' as const,
+  },
+]
 
 /**
  * Reminder hours configuration

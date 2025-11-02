@@ -93,7 +93,7 @@ function MobileFooter({
       </div>
       <QuickLinks links={customLinks} compact />
       <SupportLinks compact />
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-muted-foreground">
         {FOOTER_BRANDING.copyrightPrefix} {FOOTER_BRANDING.defaultYear}{' '}
         {FOOTER_BRANDING.appName}
       </p>
@@ -146,7 +146,7 @@ function TabletFooter({
       </div>
 
       {/* Footer */}
-      <p className="col-span-2 text-xs text-gray-500">
+      <p className="col-span-2 text-xs text-muted-foreground">
         {FOOTER_BRANDING.copyrightPrefix} {FOOTER_BRANDING.defaultYear}{' '}
         {FOOTER_BRANDING.appName}
       </p>
@@ -202,7 +202,7 @@ function DesktopFooter({
             <EnvironmentBadge hideProduction />
           )}
         </div>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-muted-foreground">
           {FOOTER_BRANDING.copyrightPrefix} {FOOTER_BRANDING.defaultYear}{' '}
           {FOOTER_BRANDING.appName}
         </p>
@@ -238,7 +238,7 @@ export function AdminFooter({
     <footer
       role="contentinfo"
       aria-label="Admin footer"
-      className={`footer-container border-t border-gray-200 bg-white transition-all duration-300 p-4 text-sm ${className}`}
+      className={`footer-container border-t border-border bg-card transition-all duration-300 p-4 text-sm ${className}`}
     >
       <div className="max-w-7xl mx-auto">
         {/* Always use the compact/simple footer across all admin pages to match sidebar footer height */}
