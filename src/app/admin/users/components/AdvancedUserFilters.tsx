@@ -209,11 +209,11 @@ function FilterContent({
             Role
           </label>
           <Select
-            value={filters.role || ''}
+            value={filters.role || 'ALL_ROLES'}
             onValueChange={(value) =>
               onFiltersChange({
                 ...filters,
-                role: value || undefined
+                role: value === 'ALL_ROLES' ? undefined : value
               })
             }
           >
@@ -221,7 +221,7 @@ function FilterContent({
               <SelectValue placeholder="All Roles" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Roles</SelectItem>
+              <SelectItem value="ALL_ROLES">All Roles</SelectItem>
               {roleOptions.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>
                   {opt.label}
@@ -237,11 +237,11 @@ function FilterContent({
             Status
           </label>
           <Select
-            value={filters.status || ''}
+            value={filters.status || 'ALL_STATUSES'}
             onValueChange={(value) =>
               onFiltersChange({
                 ...filters,
-                status: value || undefined
+                status: value === 'ALL_STATUSES' ? undefined : value
               })
             }
           >
@@ -249,7 +249,7 @@ function FilterContent({
               <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Statuses</SelectItem>
+              <SelectItem value="ALL_STATUSES">All Statuses</SelectItem>
               {statusOptions.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>
                   {opt.label}
@@ -266,11 +266,11 @@ function FilterContent({
               Department
             </label>
             <Select
-              value={filters.department || ''}
+              value={filters.department || 'ALL_DEPARTMENTS'}
               onValueChange={(value) =>
                 onFiltersChange({
                   ...filters,
-                  department: value || undefined
+                  department: value === 'ALL_DEPARTMENTS' ? undefined : value
                 })
               }
             >
@@ -278,7 +278,7 @@ function FilterContent({
                 <SelectValue placeholder="All Departments" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Departments</SelectItem>
+                <SelectItem value="ALL_DEPARTMENTS">All Departments</SelectItem>
                 {departmentOptions.map((opt) => (
                   <SelectItem key={opt.value} value={opt.value}>
                     {opt.label}
