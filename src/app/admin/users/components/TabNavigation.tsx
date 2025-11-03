@@ -3,7 +3,7 @@
 import React from 'react'
 import { cn } from '@/lib/utils'
 
-export type TabType = 'dashboard' | 'workflows' | 'bulk-operations' | 'audit' | 'admin'
+export type TabType = 'dashboard' | 'entities' | 'workflows' | 'bulk-operations' | 'audit' | 'rbac' | 'admin'
 
 interface TabNavigationProps {
   activeTab: TabType
@@ -23,6 +23,12 @@ const TABS: Array<{
     description: 'Operations overview and user management'
   },
   {
+    id: 'entities',
+    label: 'Entities',
+    icon: '🏢',
+    description: 'Manage Clients and Team'
+  },
+  {
     id: 'workflows',
     label: 'Workflows',
     icon: '🔄',
@@ -39,6 +45,12 @@ const TABS: Array<{
     label: 'Audit Log',
     icon: '🔐',
     description: 'Compliance and audit trail'
+  },
+  {
+    id: 'rbac',
+    label: 'Roles & Permissions',
+    icon: '🔒',
+    description: 'Manage roles and user access'
   },
   {
     id: 'admin',

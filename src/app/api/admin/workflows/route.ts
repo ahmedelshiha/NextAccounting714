@@ -1,70 +1,71 @@
-import { NextResponse } from 'next/server'
-import { withTenantContext } from '@/lib/api-wrapper'
-import { requireTenantContext } from '@/lib/tenant-utils'
-import { hasPermission, PERMISSIONS } from '@/lib/permissions'
-import { respond } from '@/lib/api-response'
+import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { workflowBuilder } from '@/services/workflow-builder.service'
+import { withAdminAuth } from '@/lib/auth-middleware'
 
-export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
-// GET /api/admin/workflows - list workflows
-export const GET = withTenantContext(async (request: Request) => {
-  const ctx = requireTenantContext()
-  if (!ctx.userId) return respond.unauthorized()
-  if (!hasPermission(ctx.role ?? '', PERMISSIONS.USERS_MANAGE)) return respond.forbidden('Forbidden')
-
+export const GET = withAdminAuth(async (req: NextRequest) => {
   try {
-    const { searchParams } = new URL(request.url)
-    const status = searchParams.get('status') || undefined
-    const type = searchParams.get('type') || undefined
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)))
-    const skip = (page - 1) * limit
+    const { searchParams } = new URL(req.url)
+    const status = searchParams.get('status')
+    const limit = parseInt(searchParams.get('limit') || '50')
+    const offset = parseInt(searchParams.get('offset') || '0')
 
-    const where: any = { tenantId: ctx.tenantId }
-    if (status) where.status = status
-    if (type) where.type = type
+    const where = status ? { status } : {}
 
-    let workflows: any[] = []
-    let total = 0
-    try {
-      [workflows, total] = await Promise.all([
-        prisma.userWorkflow.findMany({ where, skip, take: limit, orderBy: { createdAt: 'desc' } }),
-        prisma.userWorkflow.count({ where })
-      ])
-    } catch {
-      workflows = []
-      total = 0
-    }
-
-    return NextResponse.json({ workflows, pagination: { page, limit, total } })
-  } catch (e) {
-    return respond.serverError('Failed to fetch workflows')
-  }
-})
-
-// POST /api/admin/workflows - create workflow from template or default
-export const POST = withTenantContext(async (request: Request) => {
-  const ctx = requireTenantContext()
-  if (!ctx.userId) return respond.unauthorized()
-  if (!hasPermission(ctx.role ?? '', PERMISSIONS.USERS_MANAGE)) return respond.forbidden('Forbidden')
-
-  try {
-    const body = await request.json()
-    const { userId, templateId, type, scheduledFor } = body || {}
-    if (!userId) return respond.badRequest('userId is required')
-
-    const wf = await workflowBuilder.createWorkflowFromTemplate({
-      tenantId: ctx.tenantId!,
-      userId,
-      templateId,
-      type,
-      scheduledFor
+    const workflows = await prisma.workflow.findMany({
+      where,
+      orderBy: { updatedAt: 'desc' },
+      take: limit,
+      skip: offset
     })
 
-    return NextResponse.json({ workflow: wf }, { status: 201 })
-  } catch (e) {
-    return respond.serverError('Failed to create workflow')
+    const total = await prisma.workflow.count({ where })
+
+    return NextResponse.json({
+      data: workflows,
+      pagination: { total, limit, offset }
+    })
+  } catch (error) {
+    console.error('Failed to fetch workflows:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch workflows' },
+      { status: 500 }
+    )
   }
 })
+
+export const POST = withAdminAuth(async (req: NextRequest) => {
+  try {
+    const body = await req.json()
+    const { name, description, nodes, edges } = body
+
+    if (!name) {
+      return NextResponse.json(
+        { error: 'Workflow name is required' },
+        { status: 400 }
+      )
+    }
+
+    const workflow = await prisma.workflow.create({
+      data: {
+        name,
+        description,
+        nodes: nodes || [],
+        edges: edges || [],
+        status: 'DRAFT',
+        version: 1
+      }
+    })
+
+    return NextResponse.json(workflow, { status: 201 })
+  } catch (error) {
+    console.error('Failed to create workflow:', error)
+    return NextResponse.json(
+      { error: 'Failed to create workflow' },
+      { status: 500 }
+    )
+  }
+})
+
+export const revalidate = 60

@@ -105,12 +105,6 @@ function AdminSidebar(props: AdminSidebarProps) {
           { name: 'Availability', href: '/admin/availability', icon: Clock },
           { name: 'New Booking', href: '/admin/bookings/new', icon: Calendar },
         ] },
-        { name: 'Clients', href: '/admin/clients', icon: Users, badge: counts?.newClients, children: [
-          { name: 'All Clients', href: '/admin/clients', icon: Users },
-          { name: 'Profiles', href: '/admin/clients/profiles', icon: Users },
-          { name: 'Invitations', href: '/admin/clients/invitations', icon: Mail },
-          { name: 'Add Client', href: '/admin/clients/new', icon: Users },
-        ] },
         { name: 'Services', href: '/admin/services', icon: Briefcase, permission: PERMISSIONS.SERVICES_VIEW, children: [
           { name: 'All Services', href: '/admin/services', icon: Briefcase },
           { name: 'Categories', href: '/admin/services/categories', icon: Target },
@@ -136,9 +130,22 @@ function AdminSidebar(props: AdminSidebarProps) {
       section: 'operations',
       items: [
         { name: 'Tasks', href: '/admin/tasks', icon: CheckSquare, badge: counts?.overdueTasks, permission: PERMISSIONS.TASKS_READ_ALL },
-        { name: 'Team', href: '/admin/team', icon: UserCog, permission: PERMISSIONS.TEAM_VIEW },
         { name: 'Chat', href: '/admin/chat', icon: Mail },
         { name: 'Reminders', href: '/admin/reminders', icon: Bell },
+      ]
+    },
+    {
+      section: 'system',
+      items: [
+        { name: 'User Management', href: '/admin/users', icon: Users, permission: PERMISSIONS.USERS_MANAGE },
+        { name: 'Audits', href: '/admin/audits', icon: FileText, permission: PERMISSIONS.ANALYTICS_VIEW },
+        { name: 'Compliance', href: '/admin/compliance', icon: CheckSquare, permission: PERMISSIONS.SECURITY_COMPLIANCE_SETTINGS_VIEW },
+        { name: 'Integrations', href: '/admin/integrations', icon: Briefcase, permission: PERMISSIONS.INTEGRATION_HUB_VIEW },
+        { name: 'Security', href: '/admin/security', icon: Shield, permission: PERMISSIONS.SECURITY_COMPLIANCE_SETTINGS_VIEW },
+        { name: 'Posts', href: '/admin/posts', icon: FileText, permission: PERMISSIONS.ANALYTICS_VIEW },
+        { name: 'Newsletter', href: '/admin/newsletter', icon: Mail, permission: PERMISSIONS.COMMUNICATION_SETTINGS_VIEW },
+        { name: 'Notifications', href: '/admin/notifications', icon: Bell, permission: PERMISSIONS.COMMUNICATION_SETTINGS_VIEW },
+        { name: 'Performance Metrics', href: '/admin/perf-metrics', icon: BarChart3, permission: PERMISSIONS.ANALYTICS_VIEW },
       ]
     }
   ]

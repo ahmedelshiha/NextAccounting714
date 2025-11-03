@@ -26,11 +26,46 @@ export const GET = withTenantContext(async (request: Request) => {
     if (!hasPermission(role, PERMISSIONS.USERS_MANAGE)) return respond.forbidden('Forbidden')
 
     try {
-      // Parse pagination parameters
+      // Parse pagination and filtering parameters
       const { searchParams } = new URL(request.url)
       const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
       const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50', 10)))
       const skip = (page - 1) * limit
+
+      // Parse filter parameters
+      const search = searchParams.get('search')?.trim() || undefined
+      const role = searchParams.get('role') && searchParams.get('role') !== 'ALL' ? searchParams.get('role') : undefined
+      const status = searchParams.get('status') && searchParams.get('status') !== 'ALL' ? searchParams.get('status') : undefined
+      const tier = searchParams.get('tier') && searchParams.get('tier') !== 'all' && searchParams.get('tier') !== 'ALL' ? searchParams.get('tier') : undefined
+      const department = searchParams.get('department') && searchParams.get('department') !== 'ALL' ? searchParams.get('department') : undefined
+      const sortBy = (searchParams.get('sortBy') || 'createdAt') as 'createdAt' | 'name' | 'email'
+      const sortOrder = (searchParams.get('sortOrder') || 'desc') as 'asc' | 'desc'
+
+      // Build Prisma where clause with filters
+      const whereClause = {
+        ...tenantFilter(tenantId),
+        ...(role && { role }),
+        ...(department && { department }),
+        ...(tier && { tier }),
+        // Search across multiple fields
+        ...(search && {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' as const } },
+            { email: { contains: search, mode: 'insensitive' as const } },
+            { department: { contains: search, mode: 'insensitive' as const } }
+          ]
+        })
+      }
+
+      // Build sort order
+      const orderBy: any = {}
+      if (sortBy === 'name') {
+        orderBy.name = sortOrder
+      } else if (sortBy === 'email') {
+        orderBy.email = sortOrder
+      } else {
+        orderBy.createdAt = sortOrder
+      }
 
       // Implement timeout resilience for slow queries
       let timeoutId: NodeJS.Timeout | null = null
@@ -41,20 +76,22 @@ export const GET = withTenantContext(async (request: Request) => {
       let queryData: any = null
 
       const queryPromise = Promise.all([
-        prisma.user.count({ where: tenantFilter(tenantId) }),
+        prisma.user.count({ where: whereClause }),
         prisma.user.findMany({
-          where: tenantFilter(tenantId),
+          where: whereClause,
           select: {
             id: true,
             name: true,
             email: true,
             role: true,
+            department: true,
+            tier: true,
             createdAt: true,
             updatedAt: true
           },
           skip,
           take: limit,
-          orderBy: { createdAt: 'desc' }
+          orderBy
         })
       ]).then(([total, users]) => {
         queryCompleted = true
@@ -93,7 +130,7 @@ export const GET = withTenantContext(async (request: Request) => {
       if (queryError) throw queryError
 
       // If query succeeded, use the data
-      const { total, users } = queryData as { total: number; users: Array<{ id: string; name: string | null; email: string; role: string; createdAt: Date; updatedAt: Date | null }> }
+      const { total, users } = queryData as { total: number; users: Array<{ id: string; name: string | null; email: string; role: string; department: string | null; tier: string | null; createdAt: Date; updatedAt: Date | null }> }
 
       // Map users to response format
       const mapped = users.map((user) => ({
@@ -101,6 +138,8 @@ export const GET = withTenantContext(async (request: Request) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        department: user.department || undefined,
+        tier: user.tier || undefined,
         createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt,
         updatedAt: user.updatedAt ? (user.updatedAt instanceof Date ? user.updatedAt.toISOString() : user.updatedAt) : (user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt)
       }))

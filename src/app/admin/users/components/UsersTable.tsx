@@ -1,6 +1,6 @@
 'use client'
 
-import React, { memo, useCallback } from 'react'
+import React, { memo, useCallback, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -9,6 +9,9 @@ import { UserItem } from '../contexts/UsersContextProvider'
 import { UserActions } from './UserActions'
 import { usePermissions } from '@/lib/use-permissions'
 import { VirtualScroller } from '@/lib/virtual-scroller'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { Button } from '@/components/ui/button'
+import { List, Grid3x3 } from 'lucide-react'
 
 interface UsersTableProps {
   users: UserItem[]
@@ -87,6 +90,8 @@ export const UsersTable = memo(function UsersTable({
   onSelectAll
 }: UsersTableProps) {
   const perms = usePermissions()
+  const isMobile = useMediaQuery('(max-width: 640px)')
+  const [viewMode, setViewMode] = useState<'table' | 'card'>('table')
 
   const handleRoleChange = useCallback(
     (userId: string, newRole: UserItem['role']) => {
@@ -115,7 +120,7 @@ export const UsersTable = memo(function UsersTable({
     (user: UserItem) => (
       <div
         key={user.id}
-        className="flex items-center justify-between p-4 bg-white border rounded-lg hover:shadow-sm w-full"
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-white border rounded-lg hover:shadow-sm w-full"
         role="row"
         aria-label={`User row for ${user.name || user.email}`}
       >
@@ -149,7 +154,7 @@ export const UsersTable = memo(function UsersTable({
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex flex-wrap items-center sm:justify-end gap-2 sm:gap-3 shrink-0">
           <div
             className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(user.status)}`}
             role="status"
@@ -167,7 +172,7 @@ export const UsersTable = memo(function UsersTable({
           {perms.canManageUsers && (
             <Select value={user.role} onValueChange={(val) => handleRoleChange(user.id, val as UserItem['role'])}>
               <SelectTrigger
-                className="w-28 h-8 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-32 sm:w-28 h-8 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 aria-label={`Change role for ${user.name || user.email}`}
               >
                 <SelectValue />
@@ -194,25 +199,49 @@ export const UsersTable = memo(function UsersTable({
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
         <div className="space-y-1">
           <CardTitle>User Directory</CardTitle>
           <CardDescription>Search, filter and manage users</CardDescription>
         </div>
-        {users.length > 0 && (
-          <div className="flex items-center gap-2 text-sm" role="toolbar" aria-label="Table selection actions">
-            <Checkbox
-              checked={allSelected || someSelected}
-              onCheckedChange={handleSelectAllChange}
-              aria-label={allSelected ? 'Deselect all users' : 'Select all users'}
-              title={allSelected ? 'Deselect all users' : 'Select all users'}
-              className={someSelected ? 'opacity-50' : ''}
-            />
-            <span className="text-gray-500" aria-live="polite">
-              {selectedUserIds.size > 0 ? `${selectedUserIds.size} selected` : 'Select all'}
-            </span>
-          </div>
-        )}
+        <div className="flex flex-col-reverse sm:flex-row items-start sm:items-center gap-3">
+          {users.length > 0 && (
+            <div className="flex items-center gap-2 text-sm" role="toolbar" aria-label="Table selection actions">
+              <Checkbox
+                checked={allSelected || someSelected}
+                onCheckedChange={handleSelectAllChange}
+                aria-label={allSelected ? 'Deselect all users' : 'Select all users'}
+                title={allSelected ? 'Deselect all users' : 'Select all users'}
+                className={someSelected ? 'opacity-50' : ''}
+              />
+              <span className="text-gray-500 hidden sm:inline" aria-live="polite">
+                {selectedUserIds.size > 0 ? `${selectedUserIds.size} selected` : 'Select all'}
+              </span>
+            </div>
+          )}
+          {isMobile && (
+            <div className="flex gap-1">
+              <Button
+                variant={viewMode === 'table' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('table')}
+                aria-label="Table view"
+                title="Table view"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'card' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('card')}
+                aria-label="Card view"
+                title="Card view"
+              >
+                <Grid3x3 className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -222,21 +251,105 @@ export const UsersTable = memo(function UsersTable({
             ))}
           </div>
         ) : users.length ? (
-          <div
-            role="grid"
-            aria-label="User directory table"
-            aria-rowcount={users.length}
-          >
-            <VirtualScroller
-              items={users}
-              itemHeight={96}
-              maxHeight="60vh"
-              renderItem={(user) => renderUserRow(user)}
-              overscan={5}
-              getKey={(user) => user.id}
-              className="pr-1"
-            />
-          </div>
+          isMobile && viewMode === 'card' ? (
+            <div className="space-y-3" role="grid" aria-label="User directory cards">
+              {users.map((user) => (
+                <div
+                  key={user.id}
+                  className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
+                  role="gridcell"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      onViewProfile(user)
+                    }
+                  }}
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div
+                        className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold shrink-0"
+                        aria-hidden="true"
+                      >
+                        {(user.name || user.email).charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <button
+                          onClick={() => onViewProfile(user)}
+                          className="font-medium text-gray-900 hover:text-blue-600 truncate block text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+                          aria-label={`View profile for ${user.name || user.email}`}
+                        >
+                          {user.name || 'Unnamed User'}
+                        </button>
+                        <div className="text-sm text-gray-600 truncate">
+                          {user.email}
+                        </div>
+                      </div>
+                      <UserActions
+                        user={user}
+                        onViewProfile={onViewProfile}
+                        isLoading={isUpdating}
+                      />
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 items-start">
+                      <div
+                        className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(user.status)}`}
+                        role="status"
+                        aria-label={`Status: ${user.status || 'ACTIVE'}`}
+                      >
+                        {user.status || 'ACTIVE'}
+                      </div>
+                      <div
+                        className={`px-2 py-1 rounded text-xs font-medium ${getRoleColor(user.role)}`}
+                        role="status"
+                        aria-label={`Role: ${user.role}`}
+                      >
+                        {user.role}
+                      </div>
+                    </div>
+
+                    <div className="text-xs text-gray-500 space-y-1">
+                      {user.company && <div>Company: {user.company}</div>}
+                      <div>Joined {formatDate(user.createdAt)}</div>
+                    </div>
+
+                    {perms.canManageUsers && (
+                      <Select value={user.role} onValueChange={(val) => handleRoleChange(user.id, val as UserItem['role'])}>
+                        <SelectTrigger className="w-full h-8 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="CLIENT">Client</SelectItem>
+                          <SelectItem value="TEAM_MEMBER">Team Member</SelectItem>
+                          <SelectItem value="TEAM_LEAD">Team Lead</SelectItem>
+                          <SelectItem value="STAFF">Staff</SelectItem>
+                          <SelectItem value="ADMIN">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div
+              role="grid"
+              aria-label="User directory table"
+              aria-rowcount={users.length}
+            >
+              <VirtualScroller
+                items={users}
+                itemHeight={96}
+                maxHeight="60vh"
+                renderItem={(user) => renderUserRow(user)}
+                overscan={5}
+                getKey={(user) => user.id}
+                className="pr-1"
+              />
+            </div>
+          )
         ) : (
           <div className="h-[60vh] flex items-center justify-center text-gray-500 text-sm" role="status">
             No users found matching your criteria.

@@ -1,76 +1,78 @@
-import { NextResponse } from 'next/server'
-import { withTenantContext } from '@/lib/api-wrapper'
-import { requireTenantContext } from '@/lib/tenant-utils'
-import { hasPermission, PERMISSIONS } from '@/lib/permissions'
-import { respond } from '@/lib/api-response'
+import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { workflowExecutor } from '@/services/workflow-executor.service'
+import { withAdminAuth, AuthenticatedRequest } from '@/lib/auth-middleware'
 
-export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
-// GET /api/admin/workflows/:id - details
-export const GET = withTenantContext(async (_request: Request, { params }: { params: { id: string } }) => {
-  const ctx = requireTenantContext()
-  if (!ctx.userId) return respond.unauthorized()
-  if (!ctx.tenantId) return respond.unauthorized()
-  if (!hasPermission(ctx.role ?? '', PERMISSIONS.USERS_MANAGE)) return respond.forbidden('Forbidden')
-  const id = params.id
-
+export const GET = withAdminAuth(async (req: AuthenticatedRequest, context: any) => {
   try {
-    try {
-      const wf = await prisma.userWorkflow.findFirst({
-        where: { id, tenantId: ctx.tenantId },
-        include: { steps: { orderBy: { stepNumber: 'asc' } }, history: true }
-      })
-      if (!wf) return respond.notFound('Workflow not found')
-      return NextResponse.json({ workflow: wf })
-    } catch {
-      return respond.notFound('Workflow not found')
+    const { id } = context?.params || {}
+
+    const workflow = await prisma.workflow.findUnique({
+      where: { id }
+    })
+
+    if (!workflow) {
+      return NextResponse.json(
+        { error: 'Workflow not found' },
+        { status: 404 }
+      )
     }
-  } catch {
-    return respond.serverError('Failed to fetch workflow')
+
+    return NextResponse.json(workflow)
+  } catch (error) {
+    console.error('Failed to fetch workflow:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch workflow' },
+      { status: 500 }
+    )
   }
 })
 
-// PATCH /api/admin/workflows/:id - actions: PAUSE|RESUME|CANCEL|EXECUTE|APPROVE_STEP
-export const PATCH = withTenantContext(async (request: Request, { params }: { params: { id: string } }) => {
-  const ctx = requireTenantContext()
-  if (!ctx.userId) return respond.unauthorized()
-  if (!ctx.tenantId) return respond.unauthorized()
-  if (!hasPermission(ctx.role ?? '', PERMISSIONS.USERS_MANAGE)) return respond.forbidden('Forbidden')
-
-  const id = params.id
+export const PUT = withAdminAuth(async (req: AuthenticatedRequest, context: any) => {
   try {
-    const body = await request.json()
-    const action = String(body?.action || '')
+    const { id } = context?.params || {}
+    const body = await req.json()
+    const { name, description, nodes, edges, status } = body
 
-    switch (action) {
-      case 'PAUSE': {
-        const status = await workflowExecutor.pauseWorkflow(id)
-        return NextResponse.json({ success: status === 'PAUSED', status })
+    const workflow = await prisma.workflow.update({
+      where: { id },
+      data: {
+        ...(name && { name }),
+        ...(description !== undefined && { description }),
+        ...(nodes && { nodes }),
+        ...(edges && { edges }),
+        ...(status && { status }),
+        updatedAt: new Date()
       }
-      case 'RESUME': {
-        const status = await workflowExecutor.resumeWorkflow(id)
-        return NextResponse.json({ success: status === 'IN_PROGRESS', status })
-      }
-      case 'CANCEL': {
-        const status = await workflowExecutor.cancelWorkflow(id)
-        return NextResponse.json({ success: status === 'CANCELLED', status })
-      }
-      case 'EXECUTE': {
-        const result = await workflowExecutor.executeWorkflow(id)
-        return NextResponse.json({ success: result.status === 'COMPLETED', result })
-      }
-      case 'APPROVE_STEP': {
-        const stepId = String(body?.stepId || '')
-        if (!stepId) return respond.badRequest('stepId required')
-        const status = await workflowExecutor.approveStep(stepId, ctx.userId!)
-        return NextResponse.json({ success: status !== 'FAILED', status })
-      }
-      default:
-        return respond.badRequest('Invalid action')
-    }
-  } catch {
-    return respond.serverError('Failed to update workflow')
+    })
+
+    return NextResponse.json(workflow)
+  } catch (error) {
+    console.error('Failed to update workflow:', error)
+    return NextResponse.json(
+      { error: 'Failed to update workflow' },
+      { status: 500 }
+    )
   }
 })
+
+export const DELETE = withAdminAuth(async (req: AuthenticatedRequest, context: any) => {
+  try {
+    const { id } = context?.params || {}
+
+    await prisma.workflow.delete({
+      where: { id }
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Failed to delete workflow:', error)
+    return NextResponse.json(
+      { error: 'Failed to delete workflow' },
+      { status: 500 }
+    )
+  }
+})
+
+export const revalidate = 60

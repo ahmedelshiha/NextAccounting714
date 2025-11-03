@@ -102,7 +102,7 @@ export const DashboardHeader = memo(function DashboardHeader({
             className="pl-9"
           />
         </div>
-        <Select value={roleFilter} onValueChange={handleRoleFilterChange}>
+        <Select value={roleFilter || 'ALL'} onValueChange={handleRoleFilterChange}>
           <SelectTrigger className="w-full sm:w-[160px]">
             <SelectValue placeholder="Role" />
           </SelectTrigger>
@@ -115,7 +115,7 @@ export const DashboardHeader = memo(function DashboardHeader({
             <SelectItem value="CLIENT">Client</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
+        <Select value={statusFilter || 'ALL'} onValueChange={handleStatusFilterChange}>
           <SelectTrigger className="w-full sm:w-[160px]">
             <SelectValue placeholder="Status" />
           </SelectTrigger>

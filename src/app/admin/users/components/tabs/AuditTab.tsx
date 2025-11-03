@@ -6,10 +6,13 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useAuditLogs } from '../../hooks/useAuditLogs'
 import { Input } from '@/components/ui/input'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 export function AuditTab() {
   const [showFilters, setShowFilters] = useState(false)
   const [dateRange, setDateRange] = useState<'today' | 'week' | 'month' | 'all'>('month')
+  const isMobile = useMediaQuery('(max-width: 640px)')
+  const isTablet = useMediaQuery('(max-width: 1024px)')
 
   const {
     logs,
@@ -136,13 +139,13 @@ export function AuditTab() {
 
       {/* Filters */}
       {showFilters && (
-        <Card className="p-6 border-blue-200 bg-blue-50">
+        <Card className="p-4 sm:p-6 border-blue-200 bg-blue-50">
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Date Range
               </label>
-              <div className="flex gap-2 flex-wrap">
+              <div className={`flex gap-2 ${isMobile ? 'flex-wrap' : 'flex-row'}`}>
                 {(['today', 'week', 'month', 'all'] as const).map(range => (
                   <Button
                     key={range}
@@ -244,6 +247,41 @@ export function AuditTab() {
               No operations match your filter criteria
             </p>
           </div>
+        ) : isMobile ? (
+          <div className="divide-y divide-gray-200">
+            {logs.map(log => (
+              <div key={log.id} className="p-4 hover:bg-gray-50 transition-colors">
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <Badge className={getActionColor(log.action)}>
+                      {log.action}
+                    </Badge>
+                    <div className="text-xs text-gray-500 whitespace-nowrap">
+                      {formatDate(log.createdAt)}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <div className="text-xs font-medium text-gray-600">User</div>
+                      <div className="text-gray-900 font-medium">{log.user?.name || 'Unknown'}</div>
+                      <div className="text-gray-600 text-xs">{log.user?.email || log.userId || '-'}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs font-medium text-gray-600">Resource</div>
+                      <div className="text-gray-600">{log.resource || '-'}</div>
+                    </div>
+                    {log.ipAddress && (
+                      <div>
+                        <div className="text-xs font-medium text-gray-600">IP Address</div>
+                        <div className="text-gray-600 font-mono text-xs">{log.ipAddress}</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -253,7 +291,9 @@ export function AuditTab() {
                   <th className="px-4 py-3 text-left font-semibold text-gray-900">User</th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-900">Resource</th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-900">Date</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-900">IP Address</th>
+                  {!isTablet && (
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900">IP Address</th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -274,9 +314,11 @@ export function AuditTab() {
                     <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
                       {formatDate(log.createdAt)}
                     </td>
-                    <td className="px-4 py-3 text-gray-600 font-mono text-xs">
-                      {log.ipAddress || '-'}
-                    </td>
+                    {!isTablet && (
+                      <td className="px-4 py-3 text-gray-600 font-mono text-xs">
+                        {log.ipAddress || '-'}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
