@@ -28,7 +28,7 @@ function getTabs(): Array<{
     {
       id: 'dashboard',
       label: 'Dashboard',
-      icon: '����',
+      icon: '📊',
       description: 'Operations overview and user management'
     },
     {
@@ -86,10 +86,12 @@ function getTabs(): Array<{
  * - Responsive design
  */
 export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
+  const tabs = getTabs()
+
   return (
     <div className="border-b border-gray-200 bg-white">
       <nav className="flex gap-4 px-4 sm:px-6 lg:px-8 overflow-x-auto" role="tablist">
-        {TABS.map((tab) => (
+        {tabs.map((tab) => (
           <button
             key={tab.id}
             role="tab"
