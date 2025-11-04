@@ -23,33 +23,53 @@ export function WorkstationSidebar({
 }: WorkstationSidebarProps) {
   return (
     <div className={`workstation-sidebar-content ${className || ''}`}>
-      {/* Quick Stats Section */}
-      <section className="sidebar-section">
-        <h3 className="sidebar-title">Quick Stats</h3>
-        {/* Stats content will be rendered here */}
-      </section>
+      {stats && (
+        <section className="sidebar-section">
+          <h3 className="sidebar-title">Quick Stats</h3>
+          <div className="sidebar-stats-container">
+            <div className="stat-item">
+              <span className="stat-label">Total Users</span>
+              <span className="stat-value">{stats.totalUsers}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">Active</span>
+              <span className="stat-value">{stats.activeUsers}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">Pending</span>
+              <span className="stat-value">{stats.pendingApprovals}</span>
+            </div>
+          </div>
+        </section>
+      )}
 
-      {/* Saved Views Section */}
       <section className="sidebar-section">
         <h3 className="sidebar-title">Saved Views</h3>
-        {/* Saved views buttons will be rendered here */}
+        <div className="sidebar-views-container">
+          <button className="view-btn">All Users</button>
+          <button className="view-btn">Clients</button>
+          <button className="view-btn">Team</button>
+          <button className="view-btn">Admins</button>
+        </div>
       </section>
 
-      {/* Filters Section */}
-      <section className="sidebar-section sidebar-filters">
-        <h3 className="sidebar-title">Filters</h3>
-        {/* Advanced filters will be rendered here */}
-      </section>
+      {filters !== undefined && (
+        <section className="sidebar-section sidebar-filters">
+          <h3 className="sidebar-title">Filters</h3>
+          <div className="sidebar-filters-container" />
+        </section>
+      )}
 
-      {/* Reset Button */}
       <div className="sidebar-footer">
-        <button
-          onClick={onReset}
-          className="sidebar-reset-btn"
-          aria-label="Reset all filters"
-        >
-          Reset Filters
-        </button>
+        {onReset && (
+          <button
+            onClick={onReset}
+            className="sidebar-reset-btn"
+            aria-label="Reset all filters"
+          >
+            Reset Filters
+          </button>
+        )}
       </div>
     </div>
   )
