@@ -1,9 +1,9 @@
 'use client'
 
 import React from 'react'
-import { useBuilderContent, useIsBuilderEnabled } from '@/hooks/useBuilderContent'
+import { useBuilderContent } from '@/hooks/useBuilderContent'
 import { BUILDER_MODELS } from '@/lib/builder-io/config'
-import QuickActionsBar from '../QuickActionsBar'
+import { QuickActionsBar } from '../QuickActionsBar'
 import OverviewCards from './OverviewCards'
 import AdminSidebar from './AdminSidebar'
 import BulkActionsPanel from './BulkActionsPanel'
