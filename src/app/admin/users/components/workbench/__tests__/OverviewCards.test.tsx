@@ -3,19 +3,16 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { vi, describe, it, beforeEach, expect } from 'vitest'
 import OverviewCards from '../OverviewCards'
 
-// Mock the useUsersContext hook
-let mockUseUsersContext: ReturnType<typeof vi.fn>
-
-vi.mock('../../../contexts/UsersContextProvider', () => {
-  mockUseUsersContext = vi.fn(() => ({
-    users: [],
-    isLoading: false,
-    error: null
-  }))
+// Setup mocks with hoisted context
+const { mockUseUsersContext } = vi.hoisted(() => {
   return {
-    useUsersContext: mockUseUsersContext
+    mockUseUsersContext: vi.fn()
   }
 })
+
+vi.mock('../../../contexts/UsersContextProvider', () => ({
+  useUsersContext: mockUseUsersContext
+}))
 
 // Mock the OperationsOverviewCards component
 vi.mock('../OperationsOverviewCards', () => ({
