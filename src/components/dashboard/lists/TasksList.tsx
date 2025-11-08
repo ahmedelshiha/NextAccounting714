@@ -1,10 +1,14 @@
 import { useMemo, useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import useSWR from 'swr'
 import FilterBar from '@/components/dashboard/FilterBar'
 import AdvancedDataTable from '@/components/dashboard/tables/AdvancedDataTable'
 import type { Column, FilterConfig } from '@/types/dashboard'
 import { apiFetch } from '@/lib/api'
 import { useTranslations } from '@/lib/i18n'
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
 
 interface TaskRow {
   id: string | number
