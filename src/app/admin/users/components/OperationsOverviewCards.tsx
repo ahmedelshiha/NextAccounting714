@@ -70,16 +70,17 @@ function MetricCard({
  * Operations Overview Cards
  *
  * Displays key metrics for user management:
- * - Active Users
- * - Pending Approvals
- * - In-Progress Workflows
- * - System Health
- * - Due This Week
+ * - Active Users (with +5% trend)
+ * - Pending Approvals (with -10% trend)
+ * - In-Progress Workflows (with -5% trend)
+ * - System Health (with +3% trend)
+ * - Cost Per User (with -2% trend)
  *
  * Features:
- * - Responsive grid layout (5 columns on desktop)
- * - Loading state support
- * - Trend indicators
+ * - Responsive grid layout (5 columns on desktop, 2 on tablet, 1 on mobile)
+ * - Compact 50% reduced size for better space efficiency
+ * - Loading state support with skeletons
+ * - Trend indicators (↑↓→ with percentages)
  * - Quick at-a-glance status
  * - Light theme styling
  */
