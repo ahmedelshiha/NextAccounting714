@@ -24,27 +24,27 @@ export const GET = withTenantContext(async (request: NextRequest) => {
 
     // Get user statistics
     const totalUsers = await prisma.user.count({
-      where: tenantFilter(tenantId) as any
+      where: tenantFilter(tenantId) 
     })
 
     const activeUsers = await prisma.user.count({
       where: {
         status: 'ACTIVE',
-        ...(tenantFilter(tenantId) as any)
+        ...(tenantFilter(tenantId) )
       }
     })
 
     const inactiveUsers = await prisma.user.count({
       where: {
         status: 'INACTIVE',
-        ...(tenantFilter(tenantId) as any)
+        ...(tenantFilter(tenantId) )
       }
     })
 
     // Get users by role
     const usersByRole = await prisma.user.groupBy({
       by: ['role'],
-      where: tenantFilter(tenantId) as any,
+      where: tenantFilter(tenantId) ,
       _count: {
         id: true
       }

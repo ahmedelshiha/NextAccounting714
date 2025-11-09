@@ -45,7 +45,7 @@ export const GET = withTenantContext(async (request: Request) => {
       const sortOrder = searchParams.get('sortOrder') || 'desc'
 
       // Build Prisma WHERE clause with filters
-      const whereClause: any = tenantFilter(tenantId)
+      const whereClause = tenantFilter(tenantId)
 
       // Add search filter (searches email and name)
       if (search) {
@@ -303,7 +303,7 @@ export const POST = withTenantContext(async (request: NextRequest) => {
       data: {
         name,
         email,
-        role: userRole as any,
+        role: userRole ,
         availabilityStatus: 'AVAILABLE',
         tenantId: tenantId || 'default-tenant',
         ...(phone && { phone }),
