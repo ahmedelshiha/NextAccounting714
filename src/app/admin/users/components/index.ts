@@ -14,7 +14,6 @@ export { OperationsOverviewCards } from './OperationsOverviewCards'
 
 // Phase 4: Tab Components
 export {
-  ExecutiveDashboardTab,
   WorkflowsTab,
   BulkOperationsTab,
   AuditTab,
