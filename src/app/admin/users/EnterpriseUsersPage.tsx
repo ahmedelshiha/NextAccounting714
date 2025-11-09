@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense, lazy } from 'react'
 import { TabNavigation, TabType } from './components/TabNavigation'
-import ExecutiveDashboardTabWrapper from './components/ExecutiveDashboardTabWrapper'
+import AdminWorkBench from './components/workbench/AdminWorkBench'
 import {
   RbacTab
 } from './components/tabs'
@@ -198,7 +198,7 @@ export function EnterpriseUsersPage() {
             )}
           >
             <Suspense fallback={<DashboardTabSkeleton />}>
-              <ExecutiveDashboardTabWrapper />
+              <AdminWorkBench />
             </Suspense>
           </ErrorBoundary>
         )}
