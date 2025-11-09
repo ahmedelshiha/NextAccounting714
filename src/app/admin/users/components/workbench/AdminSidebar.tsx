@@ -420,6 +420,28 @@ export default function AdminSidebar({
           background-color: #cbd5e1;
           border-radius: 2px;
         }
+
+        /* Chart container styles */
+        :global(.role-distribution-chart-container),
+        :global(.user-growth-chart-container) {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        :global(.role-distribution-chart-title),
+        :global(.user-growth-chart-title) {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #111827;
+          margin: 0;
+        }
+
+        :global(.role-distribution-chart-body),
+        :global(.user-growth-chart-body) {
+          width: 100%;
+          height: auto;
+        }
       `}</style>
     </div>
   )
