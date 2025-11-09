@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+'''import { NextRequest, NextResponse } from 'next/server'
 import { withTenantContext } from '@/lib/api-wrapper'
 import { requireTenantContext } from '@/lib/tenant-utils'
 import prisma from '@/lib/prisma'
@@ -208,7 +208,7 @@ export const GET = withTenantContext(async (request: Request) => {
             'X-Current-Page': page.toString(),
             'X-Page-Size': limit.toString(),
             'X-Filter-Search': search || 'none',
-            'X-Filter-Role': role || 'none',
+            'X-Filter-Role': roleFilter || 'none',
             'X-Filter-Tier': tier || 'none'
           }
         }
@@ -257,9 +257,9 @@ export const POST = withTenantContext(async (request: NextRequest) => {
   const tenantId = ctx.tenantId ?? null
 
   try {
-    const userRole = ctx.role ?? ''
+    const postUserRole = ctx.role ?? ''
     if (!ctx.userId) return respond.unauthorized()
-    if (!hasPermission(userRole, PERMISSIONS.USERS_MANAGE)) return respond.forbidden('Forbidden')
+    if (!hasPermission(postUserRole, PERMISSIONS.USERS_MANAGE)) return respond.forbidden('Forbidden')
 
     const hasDb = Boolean(process.env.NETLIFY_DATABASE_URL)
     if (!hasDb) {
@@ -280,94 +280,96 @@ export const POST = withTenantContext(async (request: NextRequest) => {
     }
 
     const json = await request.json().catch(() => ({}))
+    const { name, email, role, password } = UserCreateSchema.parse(json)
 
-    // Validate request payload
-    const parsed = UserCreateSchema.safeParse(json)
-    if (!parsed.success) {
-      const errors = parsed.error.flatten().fieldErrors
-      const message = Object.entries(errors)
-        .map(([field, msgs]) => `${field}: ${msgs?.[0] || 'invalid'}`)
-        .join('; ')
-      return NextResponse.json({ error: message }, { status: 400 })
-    }
-
-    const { name, email, role: userRole = 'USER', requiresOnboarding = true, phone, company, location, notes } = parsed.data
-
-    // Check if user already exists using tenant-scoped compound key
-    const existingUser = tenantId
-      ? await prisma.user.findFirst({
-          where: { tenantId, email },
-          select: { id: true }
-        })
-      : null
+    const existingUser = await prisma.user.findFirst({
+      where: tenantFilter(tenantId, { email })
+    })
 
     if (existingUser) {
-      return NextResponse.json({ error: 'User with this email already exists' }, { status: 409 })
+      return respond.conflict('User with this email already exists')
     }
 
-    // Create new user
     const newUser = await prisma.user.create({
       data: {
         name,
         email,
-        role: userRole as UserRole ,
-        availabilityStatus: 'AVAILABLE',
-        tenantId: tenantId || 'default-tenant',
-        ...(phone && { phone }),
-        ...(company && { department: company }),
-        ...(location && { position: location }),
-        ...(notes && { image: notes })
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true
+        role,
+        password,
+        tenantId
       }
     })
 
-    // Log audit event
-    try {
-      if (tenantId) {
-        await AuditLogService.createAuditLog({
-          tenantId,
-          userId: ctx.userId,
-          action: 'user.create',
-          resource: `user:${newUser.id}`,
-          metadata: {
-            targetUserId: newUser.id,
-            targetEmail: newUser.email,
-            targetName: newUser.name,
-            targetRole: newUser.role,
-            timestamp: new Date().toISOString()
-          },
-          ipAddress: ip,
-          userAgent: request.headers.get('user-agent') || undefined
-        })
-      }
-    } catch (auditErr) {
-      console.error('Failed to log user creation audit event:', auditErr)
-      // Don't fail the request if audit logging fails
-    }
+    const audit = new AuditLogService(ctx)
+    await audit.log('user.create', {
+      userId: newUser.id,
+      data: { name, email, role }
+    })
 
     return NextResponse.json(newUser, { status: 201 })
   } catch (error: any) {
     console.error('Error creating user:', error)
-
-    // Handle unique constraint violations
-    if (error?.code === 'P2002') {
-      const field = error.meta?.target?.[0] || 'email'
-      return NextResponse.json(
-        { error: `User with this ${field} already exists` },
-        { status: 409 }
-      )
-    }
-
-    return NextResponse.json(
-      { error: error?.message || 'Failed to create user' },
-      { status: 500 }
-    )
+    return respond.internalServerError(error.message)
   }
 })
+
+/**
+ * PUT /api/admin/users/:id
+ * Update a user in the organization
+ * Requires: USERS_MANAGE permission
+ */
+export const PUT = withTenantContext(async (request: NextRequest) => {
+  const ctx = requireTenantContext()
+  const tenantId = ctx.tenantId ?? null
+
+  try {
+    const putUserRole = ctx.role ?? ''
+    if (!ctx.userId) return respond.unauthorized()
+    if (!hasPermission(putUserRole, PERMISSIONS.USERS_MANAGE)) return respond.forbidden('Forbidden')
+
+    const hasDb = Boolean(process.env.NETLIFY_DATABASE_URL)
+    if (!hasDb) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 501 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('id')
+
+    if (!userId) {
+      return respond.badRequest('User ID is required')
+    }
+
+    const json = await request.json().catch(() => ({}))
+    const { name, email, role, password } = UserCreateSchema.parse(json)
+
+    const existingUser = await prisma.user.findFirst({
+      where: tenantFilter(tenantId, { id: userId })
+    })
+
+    if (!existingUser) {
+      return respond.notFound('User not found')
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        name,
+        email,
+        role,
+        password
+      }
+    })
+
+    const audit = new AuditLogService(ctx)
+    await audit.log('user.update', {
+      userId: updatedUser.id,
+      data: { name, email, role }
+    })
+
+    return NextResponse.json(updatedUser, { status: 200 })
+  } catch (error: any) {
+    console.error('Error updating user:', error)
+    return respond.internalServerError(error.message)
+  }
+})
+'''
