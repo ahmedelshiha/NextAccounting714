@@ -171,6 +171,20 @@ export default function InlineUserProfile({ onBack }: { onBack: () => void }) {
           </div>
         </div>
       </div>
+
+      {/* Permission Modal */}
+      {permissionModalOpen && selectedUser && (
+        <UnifiedPermissionModal
+          mode="user"
+          user={selectedUser}
+          isOpen={permissionModalOpen}
+          onClose={() => setPermissionModalOpen(false)}
+          onSuccess={() => {
+            setPermissionModalOpen(false)
+            toast.success('Permissions updated successfully')
+          }}
+        />
+      )}
     </div>
   )
 }
