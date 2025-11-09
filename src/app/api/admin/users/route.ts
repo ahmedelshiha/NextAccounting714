@@ -321,7 +321,11 @@ export const POST = withTenantContext(async (request: NextRequest) => {
  */
 export const PUT = withTenantContext(async (request: NextRequest) => {
   const ctx = requireTenantContext()
-  const tenantId = ctx.tenantId ?? null
+  const tenantId = ctx.tenantId
+
+  if (!tenantId) {
+    return respond.badRequest('Tenant context is required')
+  }
 
   try {
     const putUserRole = ctx.role ?? ''
