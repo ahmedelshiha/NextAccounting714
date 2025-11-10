@@ -9,10 +9,32 @@
 ## 📋 TABLE OF CONTENTS
 
 1. [Completed Phases (1-12)](#completed-phases)
-2. [Pending Phases (13-20)](#pending-phases)
-3. [Timeline & Priority Matrix](#timeline--priority-matrix)
-4. [Implementation Guidelines](#implementation-guidelines)
-5. [Related Documentation](#related-documentation)
+2. [Completed Phases (13-14)](#pending-phases)
+3. [Pending Phases (15-20)](#pending-phases)
+4. [Timeline & Priority Matrix](#timeline--priority-matrix)
+5. [Implementation Guidelines](#implementation-guidelines)
+6. [Related Documentation](#related-documentation)
+
+---
+
+## 🆕 NEWLY COMPLETED PHASES (13-14)
+
+**Phase 13 & 14 are now complete!** See [PHASE_13_14_IMPLEMENTATION_SUMMARY.md](./PHASE_13_14_IMPLEMENTATION_SUMMARY.md) for detailed documentation.
+
+### What's New:
+- ✅ **Phase 13: Advanced Export** (5/5 tasks complete)
+  - PDF export with professional formatting and branding
+  - Advanced Excel with multiple sheets and formulas
+  - Email scheduling system (daily/weekly/monthly/quarterly/yearly)
+  - 7 new utility files + 2 API routes + Hook + UI components
+
+- ✅ **Phase 14: Custom Report Builder** (4/4 tasks complete)
+  - Drag-and-drop report sections with 3 pre-built templates
+  - Summary calculations, grouping, filtering, and sorting
+  - Multi-format export (PDF, XLSX, CSV, JSON)
+  - 3 new utility files + 3 API routes + Hook
+
+---
 
 ---
 
