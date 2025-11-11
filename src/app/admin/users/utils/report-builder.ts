@@ -14,8 +14,8 @@ import {
 /**
  * Escape HTML special characters
  */
-function escapeHTML(str: string): string {
-  return str
+function escapeHTMLChars(str: string): string {
+  return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -37,7 +37,7 @@ export function generateReportHTML(
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${escapeHTML(report.name)}</title>
+      <title>${escapeHTMLChars(report.name)}</title>
       <style>
         * {
           margin: 0;
