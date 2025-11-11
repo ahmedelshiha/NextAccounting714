@@ -167,6 +167,26 @@ Each phase includes objectives, key tasks, acceptance criteria, and dependencies
 - Testing
   - Unit: validators (CR/ID formats), swipe reducer; Integration: tab flows; E2E: happy path and offline registry; RTL snapshots.
 
+### Phase 1.1B — Business Verification (post “Swipe to Setup”)
+- Observed UI
+  - Title: “Business Verification”; large success icon; celebratory copy; primary CTA: “Continue”.
+- Flow & States
+  - Immediately after swipe: create setup job with idempotency key and return entity_setup_id. Show Pending screen, then Success/Error.
+  - Pending: spinner + copy “Verifying your license and details (≈ <5 min). We’ll notify you when done.” Offer “Continue in background”.
+  - Success: screen per image; CTA routes to Entity Overview with checklist and actionables.
+  - Error: friendly failure screen with reason code (not found/duplicate/rate-limited) and CTAs: Try again, Manual Review (opens Messaging case), Contact Support.
+- Backend
+  - Queue job: verify license/registrations, OCR attachments, create entity, record consent, emit audit events.
+  - Webhooks/adapters for registries with exponential backoff. Persist verification_attempts.
+  - Real-time status via Postgres NOTIFY or Redis pub/sub; fallback to polling (2s → 5s backoff, cap 60s).
+- Telemetry & Copy
+  - Events: setup.status.pending/success/error, time_to_verify, registry.latency, retries, error_code.
+  - Localized AR/EN strings; tone concise; number/date formatting per locale.
+- Security & Compliance
+  - Do not expose PII in toasts/logs; mask license numbers; encrypt identifiers at rest.
+- Acceptance Criteria
+  - Success screen appears only after persisted entity + audit log; deep-link works; reconnection resumes last state; RTL layout validated.
+
 ### Phase 2 — Dashboard & Actionables (right panel)
 - Tasks
   - Action center with upcoming/overdue filings, renewals, and required evidence.
