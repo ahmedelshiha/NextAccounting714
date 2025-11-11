@@ -235,41 +235,6 @@ export default function AdminSidebar({
           border-radius: 0.375rem;
         }
 
-        .admin-sidebar-filter-group {
-          display: flex;
-          flex-direction: column;
-          gap: 0.375rem;
-        }
-
-        .admin-sidebar-filter-label {
-          font-size: 0.75rem;
-          font-weight: 600;
-          color: #6b7280;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-        }
-
-        .admin-sidebar-filter-select {
-          padding: 0.5rem 0.75rem;
-          font-size: 0.875rem;
-          border: 1px solid #d1d5db;
-          border-radius: 0.375rem;
-          background-color: #ffffff;
-          color: #111827;
-          transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .admin-sidebar-filter-select:hover {
-          border-color: #9ca3af;
-          background-color: #f9fafb;
-        }
-
-        .admin-sidebar-filter-select:focus {
-          outline: none;
-          border-color: #1f55d4;
-          box-shadow: 0 0 0 3px rgba(31, 85, 212, 0.1);
-        }
-
         /* Scrollbar styling */
         .admin-sidebar-content::-webkit-scrollbar {
           width: 4px;
