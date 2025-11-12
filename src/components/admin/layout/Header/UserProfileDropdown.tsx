@@ -4,7 +4,7 @@ import { useMemo, type Ref, memo, type ReactNode } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
-import { ChevronDown, User as UserIcon, Settings, LogOut } from "lucide-react"
+import { ChevronDown, User as UserIcon, Settings, LogOut, LayoutDashboard } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { hasPermission } from "@/lib/permissions"
+import { hasPermission, PERMISSIONS } from "@/lib/permissions"
 import Avatar from "./UserProfileDropdown/Avatar"
 import UserInfo from "./UserProfileDropdown/UserInfo"
 import { ThemeSelector } from "./UserProfileDropdown/ThemeSelector"
@@ -215,6 +215,17 @@ function UserProfileDropdownComponent({
             ) : (
               <UserIcon className="h-4 w-4 text-gray-600" />
             )}
+            {showStatus && (
+              <span
+                aria-hidden
+                className={cn(
+                  "absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ring-2 ring-white",
+                  userStatus === "online" && "bg-green-500",
+                  userStatus === "away" && "bg-amber-400",
+                  userStatus === "busy" && "bg-red-500"
+                )}
+              />
+            )}
           </div>
           <div className="hidden md:block text-left">
             <div className="text-sm font-medium text-gray-900">{name}</div>
@@ -251,6 +262,19 @@ function UserProfileDropdownComponent({
             {showStatus && <StatusSelector />}
           </div>
         </MenuSection>
+
+        {/* Admin Section - Show only to users with admin permissions */}
+        {(hasPermission(role, PERMISSIONS.ANALYTICS_VIEW) ||
+          hasPermission(role, PERMISSIONS.USERS_MANAGE) ||
+          hasPermission(role, PERMISSIONS.SYSTEM_ADMIN_SETTINGS_VIEW)) && (
+          <MenuSection title="Administration">
+            <MenuItem
+              href="/admin"
+              label="Admin Dashboard"
+              icon={LayoutDashboard}
+            />
+          </MenuSection>
+        )}
 
         {/* Profile Actions Section */}
         <MenuSection title="Profile">

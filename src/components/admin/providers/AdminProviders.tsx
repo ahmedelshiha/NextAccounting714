@@ -11,6 +11,7 @@
 'use client'
 
 import { ReactNode } from 'react'
+import React from 'react'
 import { SWRConfig } from 'swr'
 import { RealtimeProvider } from '@/components/dashboard/realtime/RealtimeProvider'
 import { ErrorBoundary } from '@/components/providers/error-boundary'
@@ -19,10 +20,34 @@ import { usePerformanceMonitoring } from '@/hooks/usePerformanceMonitoring'
 import { UXMonitor } from '@/components/admin/monitoring/UXMonitor'
 import useRoleSync from '@/hooks/useRoleSync'
 import { TenantSyncProvider } from '@/components/providers/TenantSyncProvider'
+import { useMenuCustomizationStore } from '@/stores/admin/menuCustomization.store'
 
 interface AdminProvidersProps {
   children: ReactNode
   session?: any
+}
+
+/**
+ * Menu Customization Mount Component
+ *
+ * Initializes the menu customization store when the admin dashboard loads.
+ * This ensures user preferences are loaded from the server on app bootstrap.
+ */
+function MenuCustomizationMount() {
+  const { loadCustomization } = useMenuCustomizationStore()
+
+  React.useEffect(() => {
+    try {
+      loadCustomization().catch((error) => {
+        console.error('Failed to load menu customization:', error)
+        // Silently fail - the store will use default configuration
+      })
+    } catch (error) {
+      console.error('Menu customization initialization error:', error)
+    }
+  }, [loadCustomization])
+
+  return null
 }
 
 /**
@@ -55,8 +80,8 @@ export function AdminProviders({ children }: AdminProvidersProps) {
   return (
     <ErrorBoundary
       fallback={({ error, resetError }) => (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="max-w-md w-full bg-card shadow-lg rounded-lg p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <svg className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -94,6 +119,7 @@ export function AdminProviders({ children }: AdminProvidersProps) {
             <RealtimeProvider>
               <PerformanceWrapper>
                 <RoleSyncMount />
+                <MenuCustomizationMount />
                 <UXMonitor>
                   {children}
                 </UXMonitor>
@@ -121,7 +147,7 @@ function RoleSyncMount() {
  */
 export function AdminProvidersServer({ children }: AdminProvidersProps) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {children}
     </div>
   )

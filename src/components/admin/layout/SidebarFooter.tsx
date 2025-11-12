@@ -7,9 +7,10 @@ interface SidebarFooterProps {
   collapsed: boolean
   isMobile?: boolean
   onClose?: () => void
+  onOpenMenuCustomization?: () => void
 }
 
-export default function SidebarFooter({ collapsed, isMobile, onClose }: SidebarFooterProps) {
+export default function SidebarFooter({ collapsed, isMobile, onClose, onOpenMenuCustomization }: SidebarFooterProps) {
   const { data: session } = useSession()
 
   if (collapsed) {
@@ -21,9 +22,9 @@ export default function SidebarFooter({ collapsed, isMobile, onClose }: SidebarF
     <div className="admin-sidebar-footer border-t border-gray-200 bg-white transition-all duration-300 p-4">
       <button
         className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 w-full"
-        onClick={isMobile ? onClose : undefined}
-        aria-label="Menu Settings"
-        title="Menu Settings"
+        onClick={() => { try { onOpenMenuCustomization?.() } catch {} ; if (isMobile) { try { onClose?.() } catch {} }} }
+        aria-label="Customize menu"
+        title="Customize menu"
       >
         <svg className="h-5 w-5 mr-3 text-gray-500 flex-shrink-0" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />

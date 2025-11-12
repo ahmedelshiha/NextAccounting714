@@ -90,7 +90,23 @@ export const useAdminLayoutStore = create<AdminLayoutStore>()(
     }),
     {
       name: 'admin-layout-storage',
-      storage: createJSONStorage(() => (typeof window !== 'undefined' ? window.localStorage : ({} as Storage))),
+      storage: createJSONStorage(() => {
+        if (typeof window !== 'undefined' && window.localStorage) return window.localStorage
+
+        // Provide an in-memory fallback storage for server/test environments
+        const memoryStore = new Map<string, string>()
+        return {
+          getItem: (key: string) => {
+            return memoryStore.has(key) ? (memoryStore.get(key) as string) : null
+          },
+          setItem: (key: string, value: string) => {
+            memoryStore.set(key, value)
+          },
+          removeItem: (key: string) => {
+            memoryStore.delete(key)
+          },
+        } as Storage
+      }),
       partialize: (state) => ({
         sidebar: {
           collapsed: state.sidebar.collapsed,

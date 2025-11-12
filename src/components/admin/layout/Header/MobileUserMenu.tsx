@@ -11,6 +11,7 @@ import { ThemeSelector } from "./UserProfileDropdown/ThemeSelector"
 import { StatusSelector } from "./UserProfileDropdown/StatusSelector"
 import type { UserMenuLink } from "./UserProfileDropdown/types"
 import { MENU_LINKS, HELP_LINKS } from "./UserProfileDropdown/constants"
+import { useUserStatus } from "@/hooks/useUserStatus"
 
 export interface MobileUserMenuProps {
   className?: string
@@ -35,6 +36,7 @@ function MobileUserMenuComponent({
   const image = (session?.user as any)?.image as string | undefined
   const role = (session?.user as any)?.role as string | undefined
   const organization = (session?.user as any)?.organization as string | undefined
+  const { status: userStatus } = useUserStatus()
 
   const handleSignOut = () => {
     if (!onSignOut) return
@@ -78,10 +80,21 @@ function MobileUserMenuComponent({
         >
           <div className="relative h-8 w-8 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
             {image ? (
-              // eslint-disable-next-line @next/next/no-img-element
+               
               <img src={image} alt={name} className="h-full w-full object-cover" />
             ) : (
               <UserIcon className="h-4 w-4 text-gray-600" />
+            )}
+            {showStatus && (
+              <span
+                aria-hidden
+                className={cn(
+                  "absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ring-2 ring-white",
+                  userStatus === "online" && "bg-green-500",
+                  userStatus === "away" && "bg-amber-400",
+                  userStatus === "busy" && "bg-red-500"
+                )}
+              />
             )}
           </div>
           <span className="text-sm font-medium hidden sm:inline">{name}</span>
@@ -92,7 +105,7 @@ function MobileUserMenuComponent({
         <div className="space-y-4 p-4" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
           {/* Header */}
           <div className="flex items-center gap-3">
-            <Avatar name={name} src={image} size="md" showStatus={showStatus} />
+            <Avatar name={name} src={image} size="md" showStatus={showStatus} status={userStatus} />
             <UserInfo
               name={name}
               email={email}
