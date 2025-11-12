@@ -203,7 +203,7 @@ const handler: Handler = async (event: HandlerEvent) => {
 
     stats.totalDuration = Date.now() - startTime
 
-    logger.info('Banking sync cron completed', stats)
+    logger.info('Banking sync cron completed', { stats })
 
     return {
       statusCode: 200,
