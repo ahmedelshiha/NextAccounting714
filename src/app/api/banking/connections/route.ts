@@ -136,8 +136,7 @@ export const POST = withTenantContext(async (request: NextRequest) => {
     const validated = CreateConnectionSchema.parse(body)
 
     // Get provider and test connection
-    const factory = new BankingProviderFactory()
-    const provider = factory.getProvider(validated.provider)
+    const provider = createBankingProvider(validated.provider)
 
     let sessionToken: string | null = null
     try {
