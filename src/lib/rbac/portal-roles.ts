@@ -512,7 +512,10 @@ export function validateSoD(roles: PortalRole[]): {
     if (rule.conflictingRoles) {
       const hasConflict = rule.conflictingRoles.some((r) => roles.includes(r))
       if (!rule.allowed && hasConflict) {
-        violations.push(rule)
+        // Only add violation if not already added
+        if (!violations.some((v) => v.id === rule.id)) {
+          violations.push(rule)
+        }
       }
     }
 
@@ -522,7 +525,10 @@ export function validateSoD(roles: PortalRole[]): {
         const hasBoth =
           allPermissions.has(perm1) && allPermissions.has(perm2)
         if (!rule.allowed && hasBoth) {
-          violations.push(rule)
+          // Only add violation if not already added
+          if (!violations.some((v) => v.id === rule.id)) {
+            violations.push(rule)
+          }
         }
       })
     }
