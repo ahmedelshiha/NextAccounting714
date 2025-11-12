@@ -52,7 +52,7 @@ const _api_GET = async (request: NextRequest) => {
       take: searchParams.get("take") ? parseInt(searchParams.get("take")!) : 50,
     };
 
-    const entities = await entityService.listEntities(ctx.tenantId, filters);
+    const entities = await entityService.listEntities(ctx.tenantId!, filters);
 
     return NextResponse.json({
       success: true,
@@ -65,23 +65,24 @@ const _api_GET = async (request: NextRequest) => {
       { status: 500 }
     );
   }
-}
+};
 
 /**
  * POST /api/entities
  * Create new entity
  */
-export async function POST(request: NextRequest) {
+const _api_POST = async (request: NextRequest) => {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const ctx = requireTenantContext();
+    const userId = ctx.userId;
+
+    if (!userId) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
       );
     }
 
-    const ctx = await tenantContext.getContext();
     const body = await request.json();
 
     // Validate input
@@ -89,8 +90,8 @@ export async function POST(request: NextRequest) {
 
     // Create entity
     const entity = await entityService.createEntity(
-      ctx.tenantId,
-      session.user.id,
+      ctx.tenantId!,
+      userId,
       {
         ...input,
         fiscalYearStart: input.fiscalYearStart ? new Date(input.fiscalYearStart) : undefined,
