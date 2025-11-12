@@ -56,6 +56,7 @@ export const PERMISSIONS = {
   INTEGRATION_HUB_EDIT: 'integration.settings.edit',
   INTEGRATION_HUB_TEST: 'integration.settings.test',
   INTEGRATION_HUB_SECRETS_WRITE: 'integration.settings.secrets.write',
+  INTEGRATIONS_MANAGE: 'integrations.manage',
 
   // Client Management settings
   CLIENT_SETTINGS_VIEW: 'client.settings.view',
@@ -108,6 +109,12 @@ export const PERMISSIONS = {
 
   // Advanced exports
   USERS_EXPORT: 'users.export',
+
+  // Entity Management (Portal)
+  ENTITIES_CREATE: 'entities.create',
+  ENTITIES_READ: 'entities.read',
+  ENTITIES_UPDATE: 'entities.update',
+  ENTITIES_DELETE: 'entities.delete',
 } as const
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]
@@ -599,6 +606,16 @@ export const PERMISSION_METADATA: Record<Permission, PermissionMetadata> = {
     icon: 'Lock',
     tags: ['integration', 'secrets', 'security'],
   },
+  [PERMISSIONS.INTEGRATIONS_MANAGE]: {
+    key: PERMISSIONS.INTEGRATIONS_MANAGE,
+    label: 'Manage Integrations',
+    description: 'Full management of filter bar integrations (Slack, Teams, Zapier, Webhooks)',
+    category: PermissionCategory.SYSTEM,
+    risk: RiskLevel.HIGH,
+    dependencies: [PERMISSIONS.INTEGRATION_HUB_VIEW],
+    icon: 'Plug',
+    tags: ['integration', 'manage', 'slack', 'teams', 'zapier', 'webhook'],
+  },
 
   // Client Settings
   [PERMISSIONS.CLIENT_SETTINGS_VIEW]: {
@@ -916,6 +933,46 @@ export const PERMISSION_METADATA: Record<Permission, PermissionMetadata> = {
     dependencies: [PERMISSIONS.REPORTS_READ],
     icon: 'Download',
     tags: ['reports', 'generate', 'export', 'analytics'],
+  },
+
+  // Entity Management (Portal)
+  [PERMISSIONS.ENTITIES_CREATE]: {
+    key: PERMISSIONS.ENTITIES_CREATE,
+    label: 'Create Entities',
+    description: 'Create new business entities and tax registrations',
+    category: PermissionCategory.CONTENT,
+    risk: RiskLevel.MEDIUM,
+    icon: 'Plus',
+    tags: ['entities', 'create', 'business'],
+  },
+  [PERMISSIONS.ENTITIES_READ]: {
+    key: PERMISSIONS.ENTITIES_READ,
+    label: 'View Entities',
+    description: 'View entity information and registration details',
+    category: PermissionCategory.CONTENT,
+    risk: RiskLevel.LOW,
+    icon: 'Eye',
+    tags: ['entities', 'view', 'business'],
+  },
+  [PERMISSIONS.ENTITIES_UPDATE]: {
+    key: PERMISSIONS.ENTITIES_UPDATE,
+    label: 'Edit Entities',
+    description: 'Update entity information and settings',
+    category: PermissionCategory.CONTENT,
+    risk: RiskLevel.MEDIUM,
+    dependencies: [PERMISSIONS.ENTITIES_READ],
+    icon: 'Edit',
+    tags: ['entities', 'update', 'business'],
+  },
+  [PERMISSIONS.ENTITIES_DELETE]: {
+    key: PERMISSIONS.ENTITIES_DELETE,
+    label: 'Delete Entities',
+    description: 'Archive or delete business entities',
+    category: PermissionCategory.CONTENT,
+    risk: RiskLevel.HIGH,
+    dependencies: [PERMISSIONS.ENTITIES_READ],
+    icon: 'Trash',
+    tags: ['entities', 'delete', 'business'],
   },
 }
 
