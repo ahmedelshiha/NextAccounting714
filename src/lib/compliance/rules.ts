@@ -46,6 +46,28 @@ const VAT_THRESHOLDS: Record<CountryCode, number> = {
 };
 
 /**
+ * Helper to get entity type from metadata or legalForm
+ */
+function getEntityType(entity: Entity): string {
+  const metadata = entity.metadata as any;
+  if (metadata?.entityType) {
+    return metadata.entityType;
+  }
+  // Derive from legalForm if metadata not available
+  const legalForm = entity.legalForm?.toLowerCase() || '';
+  if (legalForm.includes('individual') || legalForm.includes('sole')) {
+    return 'individual';
+  }
+  if (legalForm.includes('partnership')) {
+    return 'partnership';
+  }
+  if (legalForm.includes('freelancer') || legalForm.includes('contractor')) {
+    return 'freelancer';
+  }
+  return 'company'; // Default to company
+}
+
+/**
  * Corporate Tax Rules
  * - UAE: 9% corporate tax (2023+) on taxable income > AED 375,000
  * - KSA: No corporate tax for Saudi entities, flat Zakat 2.5% applies
@@ -58,7 +80,8 @@ export function calculateCorporateTaxObligation(entity: Entity, turnover: number
     case 'SA':
       return false; // No corporate tax, Zakat applies instead
     case 'EG':
-      return entity.type === 'company' || entity.type === 'partnership'; // All companies
+      const entityType = getEntityType(entity);
+      return entityType === 'company' || entityType === 'partnership'; // All companies
     default:
       return false;
   }
