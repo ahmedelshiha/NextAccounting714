@@ -199,7 +199,7 @@ async function processEntityRow(
         country: row.country,
         name: row.businessName,
         status: "VERIFIED",
-        type: "COMPANY",
+        createdBy: userId,
         metadata: {
           importedAt: new Date().toISOString(),
           importedBy: userId,
