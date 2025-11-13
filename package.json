@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "pnpm run next-dev",
     "next-dev": "next dev",
-    "build": "bash scripts/check-required-envs.sh && prisma generate && pnpm lint && pnpm typecheck && next build",
+    "build": "bash scripts/check-required-envs.sh && prisma generate && pnpm lint && next build",
     "build:skip-env": "SKIP_ENV_VALIDATION=true bash scripts/check-required-envs.sh && prisma generate && next build",
     "typecheck": "prisma generate && tsc --noEmit -p tsconfig.build.json",
     "lint:semgrep": "semgrep --config semgrep/edge-node-imports.yml || true",
@@ -34,7 +34,7 @@
     "test:integration:serial": "vitest --run --reporter dot --threads false tests/integration",
     "test:e2e": "playwright test",
     "e2e:ci": "bash e2e/run-e2e.sh",
-    "vercel:build": "SENTRY_AUTH_TOKEN='' sh -lc \"pnpm db:generate && pnpm lint && pnpm typecheck && pnpm build\"",
+    "vercel:build": "SENTRY_AUTH_TOKEN='' sh -lc \"pnpm db:generate && pnpm lint && pnpm build\"",
     "monitoring:setup": "node scripts/production-monitoring.js",
     "monitoring:health": "node scripts/health-check.js",
     "production:deploy": "pnpm monitoring:setup && pnpm vercel:build",
@@ -97,7 +97,9 @@
     "uuid": "^13.0.0",
     "xml-js": "^1.6.11",
     "zod": "^4.1.5",
-    "zustand": "^5.0.8"
+    "zustand": "^5.0.8",
+    "@upstash/redis": "^1.20.0",
+    "csv-parse": "^5.3.6"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

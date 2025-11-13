@@ -113,7 +113,7 @@ export function useFilterState(users: UserItem[]) {
 
     // Apply advanced query filter if present
     if (filters.advancedQuery) {
-      result = result.filter(user => evaluateAdvancedQuery(user, filters.advancedQuery))
+      result = result.filter(user => evaluateAdvancedQuery(user, filters.advancedQuery!))
     }
 
     // Apply multi-select role filter (OR logic: match any selected role)
